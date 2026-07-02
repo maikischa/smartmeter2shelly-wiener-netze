@@ -80,9 +80,9 @@ the Energy Dashboard:
 | [PlatformIO](https://platformio.org/) | CLI or VS Code extension |
 
 <p>
-  <img src="docs/images/meter-e450-optical-interface.webp" alt="Landis+Gyr E450 smart meter — the round optical customer interface is circled" height="300">
+  <img src="docs/images/meter-e450-optical-interface.webp" alt="Landis+Gyr E450 smart meter — the round optical customer interface is circled" width="190">
   &nbsp;&nbsp;
-  <img src="docs/images/ir-head-ttl.jpg" alt="TTL IR read/write head with cable and jumper-wire leads" height="300">
+  <img src="docs/images/ir-head-ttl.jpg" alt="TTL IR read/write head with cable and jumper-wire leads" width="368">
   <br>
   <sub>Left: a Landis+Gyr E450 — the round <b>optical customer interface</b>
   (circled) is where the head docks. Right: a TTL IR read/write head — a small
