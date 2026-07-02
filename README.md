@@ -82,11 +82,12 @@ the Energy Dashboard:
 <p>
   <img src="docs/images/meter-e450-optical-interface.webp" alt="Landis+Gyr E450 smart meter — the round optical customer interface is circled" height="300">
   &nbsp;&nbsp;
-  <img src="docs/images/ir-head-hichi.webp" alt="IR read/write head (Hichi) — a small black puck with the optics on the bottom" height="300">
+  <img src="docs/images/ir-head-ttl.jpg" alt="TTL IR read/write head with cable and jumper-wire leads" height="300">
   <br>
   <sub>Left: a Landis+Gyr E450 — the round <b>optical customer interface</b>
-  (circled) is where the head docks. Right: an IR read/write head — a small
-  puck that snaps onto the meter's metal ring with its built-in magnet.</sub>
+  (circled) is where the head docks. Right: a TTL IR read/write head — a small
+  magnetic puck; the four jumper leads (VCC/GND/RX/TX) go straight to the
+  D1 mini.</sub>
 </p>
 
 ### About the IR read head
@@ -98,11 +99,11 @@ puck with an IR photodiode (+ LED for the write direction, unused here) that
 pulses to a plain UART signal.
 
 <p>
-  <img src="docs/images/ir-head-exploded.webp" alt="IR read head disassembled: 3D-printed housing, ring magnet, IR sensor PCB, ESP-01 module, lid" width="700">
+  <img src="docs/images/ir-head-exploded.jpg" alt="IR read head disassembled: 3D-printed housing, ring magnet, IR sensor PCB" width="520">
   <br>
-  <sub>Inside a typical head (here a "Hichi"-style unit, disassembled):
-  3D-printed housing · ring magnet that grips the meter · IR sensor PCB ·
-  and, in the WiFi variant, a piggybacked ESP-01 module.</sub>
+  <sub>Inside a typical head (here a Hichi, disassembled): 3D-printed
+  housing · ring magnet that grips the meter's metal ring · the IR
+  sensor PCB.</sub>
 </p>
 
 The de-facto standard design is the volkszähler project's
