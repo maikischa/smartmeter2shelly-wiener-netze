@@ -12,6 +12,7 @@ an off-the-shelf energy monitor. An **MQTT** JSON feed is available too, plus
 ![Framework](https://img.shields.io/badge/framework-Arduino%20%2F%20PlatformIO-orange)
 ![Board](https://img.shields.io/badge/board-Wemos%20D1%20mini-green)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Shelly%20%7C%20MQTT-41BDF5)
+![License](https://img.shields.io/badge/license-GPL--3.0-brightgreen)
 
 ```mermaid
 flowchart LR
@@ -79,15 +80,13 @@ the Energy Dashboard:
 | [PlatformIO](https://platformio.org/) | CLI or VS Code extension |
 
 <p>
-  <a href="https://commons.wikimedia.org/wiki/File:WeMos_D1_Mini_front.jpg"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/WeMos_D1_Mini_front.jpg?width=260" alt="Wemos D1 mini (ESP8266)" height="200"></a>
+  <img src="docs/images/meter-e450-optical-interface.webp" alt="Landis+Gyr E450 smart meter — the round optical customer interface is circled" height="300">
   &nbsp;&nbsp;
-  <a href="https://commons.wikimedia.org/wiki/File:Landis%2BGyr_E450_G3_1-Phase_Smart_Electricity_Meter.jpg"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Landis%2BGyr_E450_G3_1-Phase_Smart_Electricity_Meter.jpg?width=260" alt="Landis+Gyr E450 smart meter" height="200"></a>
+  <img src="docs/images/ir-head-hichi.webp" alt="IR read/write head (Hichi) — a small black puck with the optics on the bottom" height="300">
   <br>
-  <sub>Wemos D1 mini and a Landis+Gyr E450 — photos from
-  <a href="https://commons.wikimedia.org/wiki/File:WeMos_D1_Mini_front.jpg">Wikimedia Commons (1)</a>,
-  <a href="https://commons.wikimedia.org/wiki/File:Landis%2BGyr_E450_G3_1-Phase_Smart_Electricity_Meter.jpg">(2)</a>.
-  For photos of the IR read head itself, see the
-  <a href="https://wiki.volkszaehler.org/hardware/controllers/ir-schreib-lesekopf">volkszähler wiki</a>.</sub>
+  <sub>Left: a Landis+Gyr E450 — the round <b>optical customer interface</b>
+  (circled) is where the head docks. Right: an IR read/write head — a small
+  puck that snaps onto the meter's metal ring with its built-in magnet.</sub>
 </p>
 
 ### About the IR read head
@@ -98,10 +97,18 @@ puck with an IR photodiode (+ LED for the write direction, unused here) that
 **attaches to that ring with its built-in magnet** and converts the light
 pulses to a plain UART signal.
 
+<p>
+  <img src="docs/images/ir-head-exploded.webp" alt="IR read head disassembled: 3D-printed housing, ring magnet, IR sensor PCB, ESP-01 module, lid" width="700">
+  <br>
+  <sub>Inside a typical head (here a "Hichi"-style unit, disassembled):
+  3D-printed housing · ring magnet that grips the meter · IR sensor PCB ·
+  and, in the WiFi variant, a piggybacked ESP-01 module.</sub>
+</p>
+
 The de-facto standard design is the volkszähler project's
 [**IR-Schreib-Lesekopf**](https://wiki.volkszaehler.org/hardware/controllers/ir-schreib-lesekopf)
-— their wiki has photos, schematics, a DIY guide, and links to ready-made
-heads (also commonly sold on eBay/Tindie as "IR Lesekopf TTL").
+— their wiki has schematics, a DIY guide, and links to ready-made heads
+(also commonly sold on eBay/Tindie as "Hichi" / "IR Lesekopf TTL").
 
 ⚠️ **Get the TTL/UART variant, not USB.** The head must output raw 3.3 V UART
 for the ESP8266 — USB heads only work on a PC/Raspberry Pi.
@@ -307,6 +314,16 @@ Notes:
 - No test suite — this is embedded firmware, verified on real hardware.
 - ESP32 is a secondary reference target (AES via mbedtls); only ESP8266 is
   built today.
+
+## License
+
+**[GPL-3.0](LICENSE)** — free for makers: use it, study it, modify it, build
+it into your setup, share your changes. The only ask: if you distribute a
+modified version, keep it open under the same license.
+
+(GPL-3.0 is inherited from
+[aldadic/esp-smartmeter-reader](https://github.com/aldadic/esp-smartmeter-reader),
+which the decrypt/parse core is ported from.)
 
 ## Contributing
 
