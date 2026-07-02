@@ -13,12 +13,23 @@ an off-the-shelf energy monitor. An **MQTT** JSON feed is available too, plus
 ![Board](https://img.shields.io/badge/board-Wemos%20D1%20mini-green)
 ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Shelly%20%7C%20MQTT-41BDF5)
 
-```
-┌──────────────┐   IR / UART    ┌────────────────────┐   WiFi    ┌──────────────────┐
-│ Wiener Netze │ ─────────────► │  Wemos D1 mini     │ ────────► │  Home Assistant  │
-│ smart meter  │  9600 8N1      │  CRC ✓ AES-128 ✓   │  Shelly   │  Energy Dashboard│
-│ (Kundenschn.)│  encrypted     │  DLMS parse ✓      │  + MQTT   │  … or anything   │
-└──────────────┘                └────────────────────┘           └──────────────────┘
+```mermaid
+flowchart LR
+    M["⚡ Wiener Netze smart meter<br/>Landis+Gyr E450 · Iskraemeco AM550 · Siemens<br/><i>optical customer interface (Kundenschnittstelle)</i>"]
+    IR["🔴 IR read/write head<br/><i>volkszähler-style, TTL 3.3 V</i>"]
+    ESP["📶 ESP8266 — Wemos D1 mini<br/>CRC16 check · AES-128-CTR decrypt · DLMS parse"]
+    SHELLY["🔵 Shelly EM emulation<br/>HTTP :80 + CoIoT/CoAP :5683"]
+    MQTT["📨 MQTT<br/>retained JSON state"]
+    HA["🏠 Home Assistant<br/>Energy Dashboard"]
+    OTHER["🧩 ioBroker · scripts ·<br/>any Shelly-API consumer"]
+
+    M -- "IR pulses" --> IR
+    IR -- "UART 9600 8N1<br/>(encrypted DLMS)" --> ESP
+    ESP --> SHELLY
+    ESP --> MQTT
+    SHELLY -- "mDNS discovery +<br/>CoIoT push" --> HA
+    MQTT -- "JSON state" --> HA
+    SHELLY --> OTHER
 ```
 
 ## Why?
@@ -32,6 +43,20 @@ Existing projects decode this to MQTT; this one goes a step further and
 - 🔌 **Energy Dashboard ready** — grid import *and* return, out of the box.
 - 🏠 **Works beyond HA** — any Shelly-API consumer (ioBroker, custom scripts, …) can read it.
 - 📡 **MQTT too** — retained JSON state with OBIS-style keys, if you prefer (or want both).
+
+## In Home Assistant
+
+Home Assistant sees a genuine Shelly EM — auto-discovered by the official
+Shelly integration, live power via CoIoT push, and grid import/return feeding
+the Energy Dashboard:
+
+| Auto-discovered as a Shelly EM | Device page with live sensors |
+|:---:|:---:|
+| <img src="docs/images/ha-shelly-integration.png" alt="HA Shelly integration showing the SmartMeter2Shelly device" width="380"> | <img src="docs/images/ha-device-page.png" alt="HA device page: Shelly EM with energy, energy returned, power and voltage sensors" width="380"> |
+
+| Energy Dashboard — grid → home | Live power history |
+|:---:|:---:|
+| <img src="docs/images/ha-energy-dashboard.png" alt="HA Energy Dashboard energy distribution fed by the smart meter" width="380"> | <img src="docs/images/ha-energy-history.png" alt="HA power history graph: current power and power injection from the smart meter" width="380"> |
 
 ## Features
 
@@ -48,10 +73,38 @@ Existing projects decode this to MQTT; this one goes a step further and
 
 | Part | Notes |
 |------|-------|
-| Wemos D1 mini (ESP8266) | or clone; other ESP8266 boards work with pin care |
-| Optical IR read/write head | TTL/UART type (3.3 V), magnetically attaches to the meter |
-| Your meter's decryption key | free from the [Wiener Netze portal](https://smartmeter-web.wienernetze.at) — see below |
+| **Wemos D1 mini (ESP8266)** | ~3 €; or a clone / other ESP8266 board with pin care |
+| **Optical IR read/write head** | **TTL/UART type at 3.3 V** — the [volkszähler IR-Schreib-Lesekopf](https://wiki.volkszaehler.org/hardware/controllers/ir-schreib-lesekopf) design or compatible |
+| **Your meter's decryption key** | free from the [Wiener Netze portal](https://smartmeter-web.wienernetze.at) — see below |
 | [PlatformIO](https://platformio.org/) | CLI or VS Code extension |
+
+<p>
+  <a href="https://commons.wikimedia.org/wiki/File:WeMos_D1_Mini_front.jpg"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/WeMos_D1_Mini_front.jpg?width=260" alt="Wemos D1 mini (ESP8266)" height="200"></a>
+  &nbsp;&nbsp;
+  <a href="https://commons.wikimedia.org/wiki/File:Landis%2BGyr_E450_G3_1-Phase_Smart_Electricity_Meter.jpg"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Landis%2BGyr_E450_G3_1-Phase_Smart_Electricity_Meter.jpg?width=260" alt="Landis+Gyr E450 smart meter" height="200"></a>
+  <br>
+  <sub>Wemos D1 mini and a Landis+Gyr E450 — photos from
+  <a href="https://commons.wikimedia.org/wiki/File:WeMos_D1_Mini_front.jpg">Wikimedia Commons (1)</a>,
+  <a href="https://commons.wikimedia.org/wiki/File:Landis%2BGyr_E450_G3_1-Phase_Smart_Electricity_Meter.jpg">(2)</a>.
+  For photos of the IR read head itself, see the
+  <a href="https://wiki.volkszaehler.org/hardware/controllers/ir-schreib-lesekopf">volkszähler wiki</a>.</sub>
+</p>
+
+### About the IR read head
+
+Wiener Netze meters expose their data on an optical interface: an IR LED
+behind a small window, with a metal ring around it. The read head is a small
+puck with an IR photodiode (+ LED for the write direction, unused here) that
+**attaches to that ring with its built-in magnet** and converts the light
+pulses to a plain UART signal.
+
+The de-facto standard design is the volkszähler project's
+[**IR-Schreib-Lesekopf**](https://wiki.volkszaehler.org/hardware/controllers/ir-schreib-lesekopf)
+— their wiki has photos, schematics, a DIY guide, and links to ready-made
+heads (also commonly sold on eBay/Tindie as "IR Lesekopf TTL").
+
+⚠️ **Get the TTL/UART variant, not USB.** The head must output raw 3.3 V UART
+for the ESP8266 — USB heads only work on a PC/Raspberry Pi.
 
 Supported meters: **Landis+Gyr E450** and **Iskraemeco AM550** (default), plus
 **Siemens** via a build flag — see [Meter brand](#meter-brand).
@@ -62,7 +115,7 @@ Supported meters: **Landis+Gyr E450** and **Iskraemeco AM550** (default), plus
 [smartmeter-web.wienernetze.at](https://smartmeter-web.wienernetze.at) and
 request the key for your meter (it's per-meter, 16 bytes / 32 hex chars).
 
-**2. Wire the IR head** to the D1 mini:
+**2. Wire the IR head** ([TTL variant!](#about-the-ir-read-head)) to the D1 mini:
 
 | IR head | D1 mini     |
 |---------|-------------|
@@ -278,3 +331,6 @@ This project stands on prior work — thanks to:
   validated against it.
 - **[Shelly Gen1 API + CoIoT docs](https://shelly-api-docs.shelly.cloud/gen1/)**
   — protocol reference.
+- **[volkszähler wiki — IR-Schreib-Lesekopf](https://wiki.volkszaehler.org/hardware/controllers/ir-schreib-lesekopf)**
+  — the optical read-head hardware this project connects to (photos,
+  schematics, DIY guide).
