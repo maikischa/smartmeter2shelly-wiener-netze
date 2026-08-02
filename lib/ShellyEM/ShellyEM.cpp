@@ -185,6 +185,14 @@ String ShellyEM::settingsJson() {
     // HA's ShellyBlockCoordinator reads settings["coiot"]["update_period"];
     // omitting this block makes setup fail with a KeyError.
     s += "\"coiot\":{\"enabled\":true,\"update_period\":15},";
+    // HA's light + switch platforms both call is_block_channel_type_light(),
+    // which reads settings["relays"][channel]["appliance_type"]. Without a
+    // relays array the whole platform setup aborts with KeyError: 'relays'.
+    // "General" (anything not "light") makes HA treat output 0 as a switch,
+    // which matches the stub /relay/0 route below.
+    s += "\"relays\":[{\"name\":null,\"appliance_type\":\"General\",\"ison\":false,"
+         "\"has_timer\":false,\"default_state\":\"off\",\"auto_on\":0,\"auto_off\":0,"
+         "\"max_power\":0,\"schedule\":false,\"schedule_rules\":[]}],";
     s += "\"login\":{\"enabled\":false,\"unprotected\":false}";
     s += "}";
     return s;
@@ -205,6 +213,13 @@ String ShellyEM::statusJson() {
     String s = "{";
     s += "\"emeters\":[" + emeterJson() + "],";
     s += "\"relays\":[{\"ison\":false,\"has_timer\":false}],";
+    // HA's Gen1 REST entities read these straight out of /status: the "cloud"
+    // binary_sensor wants cloud.connected, the signal-strength sensor wants
+    // wifi_sta.rssi. A missing key raises KeyError and drops that entity.
+    s += "\"cloud\":{\"enabled\":false,\"connected\":false},";
+    s += "\"wifi_sta\":{\"connected\":true,\"ssid\":\"" + WiFi.SSID() +
+         "\",\"ip\":\"" + WiFi.localIP().toString() +
+         "\",\"rssi\":" + String(WiFi.RSSI()) + "},";
     s += "\"mac\":\"" + String(_mac) + "\",";
     s += "\"uptime\":" + String(millis() / 1000);
     s += "}";
